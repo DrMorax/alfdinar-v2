@@ -36,6 +36,19 @@ if (!isProduction) {
   app.use(base, sirv("./dist/client", { extensions: [] }));
 }
 
+// Go server
+app.use("/api", async (req, res) => {
+  const apiUrl = `http://localhost:4000${req.originalUrl}`;
+  const response = await fetch(apiUrl, {
+    method: req.method,
+    headers: req.headers,
+    body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
+  });
+
+  // Send the Go server response back to the client
+  res.status(response.status).send(await response.text());
+});
+
 // Serve HTML
 app.use("*all", async (req, res) => {
   try {
